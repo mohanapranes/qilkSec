@@ -8,9 +8,8 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>jar</packaging>
 
-    <artifactId>KafkaProducer</artifactId>
+    <artifactId>QueueAnalyser</artifactId>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -22,10 +21,35 @@
             <artifactId>docker-client</artifactId>
             <version>8.16.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.bundles.repackaged</groupId>
+            <artifactId>jersey-guava</artifactId>
+            <version>2.25.1</version>
+        </dependency>
 
-
-        <!-- Thanks for using https://jar-download.com -->
 
     </dependencies>
+    <build>
+        <plugins>
+        <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+        </plugin>
+        </plugins>
+    </build>
 
 </project>
