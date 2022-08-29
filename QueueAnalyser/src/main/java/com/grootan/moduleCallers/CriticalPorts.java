@@ -7,32 +7,47 @@ import com.spotify.docker.client.LogStream;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 public class CriticalPorts {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CriticalPorts.class);
     @Autowired
     private CriticalPortsOutputProducer outputProducer;
 
-    public void dockerCaller(String url) throws IOException, DockerException, InterruptedException, DockerCertificateException {
+    public void dockerCaller(String dockerImageName,String url) throws IOException, DockerException, InterruptedException, DockerCertificateException {
         final DockerClient docker = DefaultDockerClient.fromEnv().build();
-        final ContainerCreation container = docker.createContainer(ContainerConfig.builder().image("50b4ae8567eb").cmd(url).build());
+     //   docker.pull("iammpw/first_repo:qliksec_critical_ports");
+        docker.pull(dockerImageName);
+        final List<Image> allImages = docker.listImages();
+        AtomicReference<String> id = new AtomicReference<>(new String());
+        allImages.forEach(itr->{
+            if(Objects.requireNonNull(itr.repoTags()).contains(dockerImageName)){
+                id.set(itr.id());
+            }
+        });
+        final ContainerCreation container = docker.createContainer(ContainerConfig.builder().image(id.get()).cmd(url).build());
         docker.startContainer(container.id());
-        String volumeContainer = container.id();
+        String containerId = container.id();
         String logs;
-        try (LogStream stream = docker.attachContainer(volumeContainer,
+        try (LogStream stream = docker.attachContainer(containerId,
                 DockerClient.AttachParameter.LOGS, DockerClient.AttachParameter.STDOUT,
                 DockerClient.AttachParameter.STDERR, DockerClient.AttachParameter.STREAM)) {
             logs = stream.readFully();
             outputProducer.addResultInTopic(logs);
-            System.out.println(logs);
         }
+        docker.removeContainer(containerId);
+        docker.removeImage(id.get(),true,false);
+        docker.close();
     }
 
 }

@@ -16,7 +16,7 @@ public class CriticalPortsOutputProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
     public void addResultInTopic(String event){
-        LOGGER.info(String.format("Url sent -> %s",event));
+        LOGGER.info(String.format("Result sent -> %s",event));
         kafkaTemplate.send(TOPIC_NAME,event);
     }
 }
