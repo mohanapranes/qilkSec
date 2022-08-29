@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 
@@ -30,12 +31,8 @@ public class QueueAnalyser {
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, grp_id);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        //creating consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(properties);
-        //Subscribing
-        consumer.subscribe(Arrays.asList(topic));
-        //polling
-
+        consumer.subscribe(List.of(topic));
         CriticalPorts criticalPorts = new CriticalPorts();
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
