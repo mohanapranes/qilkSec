@@ -10,6 +10,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -18,30 +20,9 @@ import java.util.List;
 import java.util.Properties;
 
 
+@SpringBootApplication
 public class QueueAnalyser {
-    public static void main(String[] args) throws DockerException, IOException, DockerCertificateException, InterruptedException {
-        Logger logger = LoggerFactory.getLogger(QueueAnalyser.class);
-        String bootstrapServers = "127.0.0.1:9092";
-        String grp_id = "urlTopics";
-        String topic = "critical_ports_topic";
-        //Creating consumer properties
-        Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, grp_id);
-        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(properties);
-        consumer.subscribe(List.of(topic));
-        CriticalPorts criticalPorts = new CriticalPorts();
-        while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-            for (ConsumerRecord<String, String> record : records) {
-                logger.info("Key: " + record.key() + ", Value:" + record.value());
-                logger.info("Partition:" + record.partition() + ",Offset:" + record.offset());
-                criticalPorts.dockerCaller(record.value());
-            }
-
+    public static void main(String[] args)  {
+        SpringApplication.run(QueueAnalyser.class);
         }
-    }
 }

@@ -8,19 +8,20 @@ import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.messages.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-
+@Component
 public class CriticalPorts {
 
     @Autowired
-    private final CriticalPortsOutputProducer outputProducer = new CriticalPortsOutputProducer();
+    private CriticalPortsOutputProducer outputProducer;
 
     public void dockerCaller(String url) throws IOException, DockerException, InterruptedException, DockerCertificateException {
         final DockerClient docker = DefaultDockerClient.fromEnv().build();
-
         final ContainerCreation container = docker.createContainer(ContainerConfig.builder().image("50b4ae8567eb").cmd(url).build());
         docker.startContainer(container.id());
         String volumeContainer = container.id();
@@ -29,7 +30,7 @@ public class CriticalPorts {
                 DockerClient.AttachParameter.LOGS, DockerClient.AttachParameter.STDOUT,
                 DockerClient.AttachParameter.STDERR, DockerClient.AttachParameter.STREAM)) {
             logs = stream.readFully();
-         //   outputProducer.addResultInTopic(logs);
+            outputProducer.addResultInTopic(logs);
             System.out.println(logs);
         }
     }
