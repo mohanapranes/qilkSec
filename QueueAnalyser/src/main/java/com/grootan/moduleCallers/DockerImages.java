@@ -1,6 +1,6 @@
 package com.grootan.moduleCallers;
 
-import com.grootan.kafka.CriticalPortsOutputProducer;
+import com.grootan.kafka.producer.OutputProducerHandler;
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.LogStream;
@@ -18,11 +18,11 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
-public class CriticalPorts {
+public class DockerImages {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CriticalPorts.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DockerImages.class);
     @Autowired
-    private CriticalPortsOutputProducer outputProducer;
+    private OutputProducerHandler outputProducer;
 
     public void dockerCaller(String dockerImageName,String url) throws IOException, DockerException, InterruptedException, DockerCertificateException {
         final DockerClient docker = DefaultDockerClient.fromEnv().build();
@@ -43,7 +43,7 @@ public class CriticalPorts {
                 DockerClient.AttachParameter.LOGS, DockerClient.AttachParameter.STDOUT,
                 DockerClient.AttachParameter.STDERR, DockerClient.AttachParameter.STREAM)) {
             logs = stream.readFully();
-            outputProducer.addResultInTopic(logs);
+            outputProducer.distributeResultToTopic(dockerImageName,logs);
         }
         docker.removeContainer(containerId);
         docker.removeImage(id.get(),true,false);
