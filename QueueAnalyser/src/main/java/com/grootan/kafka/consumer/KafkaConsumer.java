@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-public class CriticalPortsConsumer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CriticalPortsConsumer.class);
+public class KafkaConsumer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaConsumer.class);
     @Autowired
     DockerImages dockerImages;
-    @KafkaListener(topics = "criticalPortsTopic", groupId = "url_receiver_topics")
+    @KafkaListener(topics = "critical_ports_topic", groupId = "url_receiver_topics")
     public void criticalPortsConsumer(String url) throws DockerException, IOException, DockerCertificateException, InterruptedException {
         LOGGER.info(String.format("URL received  from critical ports topic->%s",url));
         String dockerImageName = "iammpw/first_repo:qliksec_critical_ports";

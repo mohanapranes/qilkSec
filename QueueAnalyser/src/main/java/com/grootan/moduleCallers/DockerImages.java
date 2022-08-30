@@ -27,15 +27,13 @@ public class DockerImages {
     public void dockerCaller(String dockerImageName,String url) throws IOException, DockerException, InterruptedException, DockerCertificateException {
         final DockerClient docker = DefaultDockerClient.fromEnv().build();
      //   docker.pull("iammpw/first_repo:qliksec_critical_ports");
-        docker.pull(dockerImageName);
         final List<Image> allImages = docker.listImages();
-        AtomicReference<String> id = new AtomicReference<>(new String());
-        allImages.forEach(itr->{
-            if(Objects.requireNonNull(itr.repoTags()).contains(dockerImageName)){
-                id.set(itr.id());
-            }
-        });
-        final ContainerCreation container = docker.createContainer(ContainerConfig.builder().image(id.get()).cmd(url).build());
+        String id = getImageIdIfAvailable(docker,dockerImageName);
+        if(id.isEmpty()){
+            docker.pull(dockerImageName);
+            id = getImageIdIfAvailable(docker,dockerImageName);
+        }
+        final ContainerCreation container = docker.createContainer(ContainerConfig.builder().image(id).cmd(url).build());
         docker.startContainer(container.id());
         String containerId = container.id();
         String logs;
@@ -46,8 +44,17 @@ public class DockerImages {
             outputProducer.distributeResultToTopic(dockerImageName,logs);
         }
         docker.removeContainer(containerId);
-        docker.removeImage(id.get(),true,false);
         docker.close();
+    }
+    private String getImageIdIfAvailable(DockerClient docker,String dockerImageName) throws DockerException, InterruptedException {
+        final List<Image> allImages = docker.listImages();
+        AtomicReference<String> id = new AtomicReference<>(new String());
+        allImages.forEach(itr->{
+            if(Objects.requireNonNull(itr.repoTags()).contains(dockerImageName)){
+                id.set(itr.id());
+            }
+        });
+        return id.get();
     }
 
 }
