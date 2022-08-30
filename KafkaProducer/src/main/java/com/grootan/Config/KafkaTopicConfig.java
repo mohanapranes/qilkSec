@@ -10,9 +10,22 @@ public class KafkaTopicConfig {
 
 
   //  @Value("${spring.kafka.topic.name}")
-    private String topicName="critical_ports_topic";
+//    private String topicName="critical_ports_topic";
     @Bean
-    public NewTopic newWebAppTopicConfig(){
-        return TopicBuilder.name(topicName).build();
+    public NewTopic critical_Ports_TopicConfig(){
+        return TopicBuilder.name("criticalPortsTopic").build();
     }
+  @Bean
+  public NewTopic ssrf_TopicConfig(){
+    return TopicBuilder.name("ssrfTopic").build();
+  }
+  @Bean
+  public NewTopic ddos_TopicConfig(){
+    return TopicBuilder.name("ddosTopic").build();
+  }
+  @Bean
+  public NewTopic clickjack_TopicConfig(){
+    return TopicBuilder.name("clickjackTopic").build();
+  }
+
 }
