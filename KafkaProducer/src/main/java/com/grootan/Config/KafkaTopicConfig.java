@@ -15,17 +15,6 @@ public class KafkaTopicConfig {
     public NewTopic critical_Ports_TopicConfig(){
         return TopicBuilder.name("criticalPortsTopic").build();
     }
-  @Bean
-  public NewTopic ssrf_TopicConfig(){
-    return TopicBuilder.name("ssrfTopic").build();
-  }
-  @Bean
-  public NewTopic ddos_TopicConfig(){
-    return TopicBuilder.name("ddosTopic").build();
-  }
-  @Bean
-  public NewTopic clickjack_TopicConfig(){
-    return TopicBuilder.name("clickjackTopic").build();
-  }
+
 
 }
